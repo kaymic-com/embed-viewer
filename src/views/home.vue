@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { reactive } from "@vue/reactivity"
 import { galleries, createGallery } from "../lib/galleries"
-import SelectColOPtions from "../components/SelectColOptions.vue"
 import { useRouter } from "vue-router"
-import { colOptions } from "../lib"
 
 const router = useRouter()
 
@@ -39,10 +36,7 @@ const newGallery = async () => {
         v-for="gallery in galleries.data"
         :key="gallery.id"
         :to="`/${gallery.id}`"
-        class="
-          list-group-item list-group-item-action
-          text-center text-secondary
-        "
+        class="list-group-item list-group-item-action text-center text-secondary"
       >
         {{ new Date(gallery.createdAt).toLocaleString() }}
         -

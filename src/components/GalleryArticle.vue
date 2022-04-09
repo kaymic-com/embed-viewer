@@ -2,7 +2,7 @@
 import SelectColOptions from "./SelectColOptions.vue"
 import { ref } from "vue"
 
-const props = defineProps<{ gallery: IGallery }>()
+defineProps<{ gallery: IGallery }>()
 
 const fullscreen = ref<HTMLElement>()
 const goFullscreen = () => {

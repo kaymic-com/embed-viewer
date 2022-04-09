@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GalleryArticle from "../components/GalleryArticle.vue"
-import { computed, ref, reactive } from "vue"
+import { reactive } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import { createGallery } from "../lib/galleries"
 

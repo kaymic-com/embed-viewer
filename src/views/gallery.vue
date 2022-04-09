@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GalleryArticle from "../components/GalleryArticle.vue"
-import { computed, onMounted, reactive, ref, watch } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { galleries, saveGalleries } from "../lib/galleries"
 import Modal from "bootstrap/js/dist/modal"
@@ -50,6 +50,12 @@ const deleteGallery = () => {
     galleries.data.splice(index, 1)
     saveGalleries()
     router.push("/")
+  }
+}
+
+const removeEmbed = (index: number) => {
+  if (confirm("Are you sure?")) {
+    embeds.value.splice(index, 1)
   }
 }
 </script>
@@ -113,141 +119,54 @@ const deleteGallery = () => {
         />
       </svg>
     </button>
+  </teleport>
 
-    <!-- Modal -->
-    <div
-      class="modal fade"
-      id="modal"
-      ref="modal"
-      tabindex="-1"
-      aria-labelledby="modalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel">Edit Gallery</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="modal"
+    ref="modal"
+    tabindex="-1"
+    aria-labelledby="modalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Edit Gallery</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div v-if="gallery" class="modal-body">
+          <div class="form-check">
+            <!-- nsfw -->
+            <input
+              class="form-check-input"
+              type="checkbox"
+              v-model="gallery.nsfw"
+              id="nsfw"
+            />
+            <label class="form-check-label" for="nsfw"> NSFW </label>
           </div>
+          <hr />
 
-          <div v-if="gallery" class="modal-body">
-            <div class="form-check">
-              <!-- nsfw -->
-              <input
-                class="form-check-input"
-                type="checkbox"
-                v-model="gallery.nsfw"
-                id="nsfw"
-              />
-              <label class="form-check-label" for="nsfw"> NSFW </label>
-            </div>
-            <hr />
+          <!-- embeds -->
+          <div
+            v-for="(n, i) in embeds.length + 1"
+            :key="i"
+            class="d-flex gap-1 align-items-center justify-content-end mb-2"
+          >
+            <input type="text" v-model="embeds[i]" class="form-control" />
 
-            <!-- embeds -->
-            <div
-              v-for="(n, i) in embeds.length + 1"
-              :key="i"
-              class="d-flex gap-1 align-items-center justify-content-end mb-2"
-            >
-              <input type="text" v-model="embeds[i]" class="form-control" />
-
-              <!-- top -->
-              <button
-                @click="updateOrder(i, 0)"
-                class="btn btn-outline-secondary btn-sm"
-                title="Delete"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  class="bi bi-chevron-double-up"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.646 2.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 3.707 2.354 9.354a.5.5 0 1 1-.708-.708l6-6z"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.646 6.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 7.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
-                  />
-                </svg>
-              </button>
-              <!-- up -->
-              <button
-                @click="updateOrder(i, i - 1)"
-                class="btn btn-outline-secondary btn-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  class="bi bi-chevron-up"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
-                  />
-                </svg>
-              </button>
-              <!-- down -->
-              <button
-                @click="updateOrder(i, i + 1)"
-                class="btn btn-outline-secondary btn-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  class="bi bi-chevron-down"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-                  />
-                </svg>
-              </button>
-              <!-- bottom -->
-              <button
-                @click="updateOrder(i, embeds.length - 1)"
-                class="btn btn-outline-secondary btn-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  class="bi bi-chevron-double-down"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M1.646 6.646a.5.5 0 0 1 .708 0L8 12.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    d="M1.646 2.646a.5.5 0 0 1 .708 0L8 8.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="modal-footer d-flex justify-content-between">
-            <!-- delete -->
+            <!-- remove -->
             <button
-              @click="deleteGallery"
-              class="btn btn-outline-danger"
+              @click="removeEmbed(i)"
+              class="btn btn-outline-danger btn-sm"
               title="Delete"
             >
               <svg
@@ -255,32 +174,144 @@ const deleteGallery = () => {
                 width="24"
                 height="24"
                 fill="currentColor"
-                class="bi bi-trash"
+                class="bi bi-x-lg"
                 viewBox="0 0 16 16"
               >
                 <path
-                  d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"
+                  fill-rule="evenodd"
+                  d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"
                 />
                 <path
                   fill-rule="evenodd"
-                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
+                  d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"
                 />
               </svg>
             </button>
 
-            <!--  -->
+            <!-- top -->
             <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
+              @click="updateOrder(i, 0)"
+              class="btn btn-outline-secondary btn-sm"
+              title="Delete"
             >
-              Close
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-chevron-double-up"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M7.646 2.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 3.707 2.354 9.354a.5.5 0 1 1-.708-.708l6-6z"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M7.646 6.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 7.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
+                />
+              </svg>
+            </button>
+            <!-- up -->
+            <button
+              @click="updateOrder(i, i - 1)"
+              class="btn btn-outline-secondary btn-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-chevron-up"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
+                />
+              </svg>
+            </button>
+            <!-- down -->
+            <button
+              @click="updateOrder(i, i + 1)"
+              class="btn btn-outline-secondary btn-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-chevron-down"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+                />
+              </svg>
+            </button>
+            <!-- bottom -->
+            <button
+              @click="updateOrder(i, embeds.length - 1)"
+              class="btn btn-outline-secondary btn-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-chevron-double-down"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M1.646 6.646a.5.5 0 0 1 .708 0L8 12.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M1.646 2.646a.5.5 0 0 1 .708 0L8 8.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+                />
+              </svg>
             </button>
           </div>
         </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <!-- delete -->
+          <button
+            @click="deleteGallery"
+            class="btn btn-outline-danger"
+            title="Delete"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="currentColor"
+              class="bi bi-trash"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"
+              />
+              <path
+                fill-rule="evenodd"
+                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
+              />
+            </svg>
+          </button>
+
+          <!--  -->
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
-  </teleport>
+  </div>
 
   <GalleryArticle v-if="gallery" :gallery="gallery" />
 </template>
